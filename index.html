@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayerZone | Student Ranking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        /* ===== GLOBAL RESET & VARIABLES ===== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f4f6fc;
+            --surface: #ffffff;
+            --surface-2: #f8f9ff;
+            --text: #20243a;
+            --muted: #8990a7;
+            --border: #e9ebf4;
+
+            --primary: #7357ff;
+            --primary-light: #eeeaff;
+            --secondary: #00c9e8;
+
+            --green: #16b978;
+            --orange: #ff9d36;
+            --red: #f04d65;
+
+            --shadow: 0 8px 30px rgba(31, 35, 80, 0.06);
+            --sidebar-width: 255px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        button, input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 27px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-icon {
+            width: 43px;
+            height: 43px;
+            background: linear-gradient(135deg, #7357ff, #00c9e8);
+            color: white;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            font-size: 21px;
+            box-shadow: 0 5px 15px rgba(115, 87, 255, 0.3);
+        }
+
+        .brand h2 {
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .brand h2 span {
+            color: var(--primary);
+        }
+
+        .brand small {
+            display: block;
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            margin-top: 4px;
+        }
+
+        .sidebar-section {
+            padding: 25px 15px 0;
+        }
+
+        .sidebar-heading {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--muted);
+            letter-spacing: 1.6px;
+            padding: 0 10px 13px;
+        }
+
+        .nav-link {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 12px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-link i {
+            width: 20px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background: var(--surface-2);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            box-shadow: inset 3px 0 var(--primary);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .sidebar-profile strong {
+            display: block;
+            font-size: 12px;
+        }
+
+        .sidebar-profile small {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .online {
+            color: var(--green);
+            font-size: 9px;
+            margin-left: auto;
+        }
+
+        /* ===== MAIN ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            min-width: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            min-height: 91px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left,
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-heading h1 {
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .page-heading p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: var(--surface-2);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 10px;
+        }
+
+        .search-box {
+            width: 285px;
+            height: 41px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-2);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 9px;
+        }
+
+        .search-box i {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .search-box input {
+            flex: 1;
+            width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 11px;
+        }
+
+        .search-box input::placeholder {
+            color: var(--muted);
+        }
+
+        .search-shortcut {
+            color: var(--muted);
+            font-size: 10px;
+            border: 1px solid var(--border);
+            padding: 3px 6px;
+            border-radius: 5px;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary);
+            transform: rotate(15deg);
+        }
+
+        /* ===== PAGES ===== */
+        .page-container {
+            padding: 28px 30px;
+            flex: 1;
+        }
+
+        .page {
+            display: none;
+            animation: pageEnter 0.35s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== BANNER ===== */
+        .welcome-banner {
+            min-height: 220px;
+            padding: 35px;
+            border-radius: 19px;
+            background: linear-gradient(115deg, #25205e, #5140b7 65%, #765aff);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(89, 69, 194, 0.2);
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .eyebrow {
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+        }
+
+        .welcome-banner .eyebrow {
+            color: #a9f5ff;
+        }
+
+        .welcome-banner h2 {
+            font-size: clamp(23px, 3vw, 33px);
+            font-weight: 900;
+            margin: 13px 0;
+        }
+
+        .welcome-banner h2 span {
+            color: #00e5ff;
+        }
+
+        .welcome-banner p {
+            color: #d1d0fa;
+            font-size: 12px;
+            line-height: 1.7;
+            max-width: 440px;
+        }
+
+        .primary-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: #00d4ec;
+            color: #151b42;
+            border-radius: 8px;
+            padding: 12px 17px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-top: 22px;
+            transition: 0.25s;
+        }
+
+        .primary-button:hover {
+            background: white;
+            transform: translateY(-3px);
+        }
+
+        .welcome-decoration {
+            position: absolute;
+            right: 9%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 210px;
+            height: 210px;
+            display: grid;
+            place-items: center;
+        }
+
+        .welcome-decoration > i {
+            font-size: 110px;
+            color: #ffca45;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
+            z-index: 2;
+            animation: trophyFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes trophyFloat {
+            0%, 100% { transform: translateY(0) rotate(-4deg); }
+            50% { transform: translateY(-12px) rotate(4deg); }
+        }
+
+        .decoration-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .circle-one { width: 180px; height: 180px; }
+        .circle-two { width: 230px; height: 230px; }
+
+        /* ===== STATISTICS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 17px;
+            margin: 25px 0 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 19px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            box-shadow: var(--shadow);
+            min-width: 0;
+            transition: 0.25s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .stat-icon {
+            width: 43px;
+            height: 43px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            font-size: 17px;
+        }
+
+        .stat-icon.purple { color: #8064ff; background: #eeeaff; }
+        .stat-icon.blue { color: #1da9ec; background: #e5f5ff; }
+        .stat-icon.orange { color: #ff9d36; background: #fff2df; }
+        .stat-icon.green { color: #16b978; background: #e2f9ee; }
+
+        .stat-card p {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .stat-card h2 {
+            font-size: 21px;
+            font-weight: 900;
+            overflow-wrap: anywhere;
+        }
+
+        /* ===== SECTION HEADERS ===== */
+        .section-header,
+        .page-intro {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 30px 0 17px;
+        }
+
+        .section-header h2,
+        .page-intro h2 {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .section-header p,
+        .page-intro p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        .text-button {
+            color: var(--primary);
+            background: transparent;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .text-button i { margin-left: 5px; }
+
+        /* ===== CLASS CARDS ===== */
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 17px;
+        }
+
+        .class-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 21px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.25s;
+            box-shadow: var(--shadow);
+        }
+
+        .class-card::after {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            right: -35px;
+            top: -35px;
+            transition: 0.3s;
+        }
+
+        .class-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .class-card:hover::after { transform: scale(1.5); }
+
+        .class-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .class-card-icon {
+            width: 47px;
+            height: 47px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            font-size: 19px;
+        }
+
+        .class-card-arrow {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .class-card h3 {
+            font-size: 20px;
+            margin-top: 20px;
+            font-weight: 900;
+        }
+
+        .class-card p {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 7px;
+        }
+
+        .class-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            margin-top: 18px;
+            padding-top: 14px;
+            font-size: 10px;
+        }
+
+        .class-card-footer strong { color: var(--primary); }
+
+        /* ===== TOP THREE ===== */
+        .dashboard-top-three {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 17px;
+            margin-bottom: 20px;
+        }
+
+        .mini-player {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 19px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: 0.25s;
+        }
+
+        .mini-player:hover { transform: translateY(-4px); }
+
+        .mini-player .rank-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 6px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 20px;
+        }
+
+        .mini-player img {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            margin: 15px auto 10px;
+            display: block;
+        }
+
+        .mini-player h3 {
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .mini-player p {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .mini-player strong {
+            display: block;
+            color: var(--orange);
+            font-size: 18px;
+            margin-top: 12px;
+        }
+
+        /* ===== CLASS DETAILS ===== */
+        .class-detail-header { margin-bottom: 20px; }
+
+        .back-button {
+            background: transparent;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 23px;
+        }
+
+        .back-button:hover { color: var(--primary); }
+        .back-button i { margin-right: 7px; }
+
+        .class-detail-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .class-large-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #7357ff, #00c9e8);
+            border-radius: 15px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .class-detail-title h2 {
+            font-size: 25px;
+            font-weight: 900;
+            margin: 5px 0;
+        }
+
+        .class-detail-title p {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .compact-stats {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin: 20px 0;
+        }
+
+        /* ===== TABLE ===== */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .table-header h2 {
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .table-header p {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        thead { background: var(--surface-2); }
+
+        th {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--muted);
+            padding: 15px 17px;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.3px;
+        }
+
+        td {
+            padding: 13px 17px;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr { transition: background 0.2s; }
+        tbody tr:hover { background: var(--surface-2); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .rank-number {
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .rank-number.first { color: #ffb52f; }
+        .rank-number.second { color: #a4a9b9; }
+        .rank-number.third { color: #d58b52; }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-info img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+        }
+
+        .player-info strong {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .points-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            background: rgba(255, 157, 54, 0.13);
+            color: #e99a29;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        /* ===== PODIUM ===== */
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 15px;
+            margin: 40px auto;
+            max-width: 720px;
+            min-height: 310px;
+        }
+
+        .podium-player {
+            width: 30%;
+            text-align: center;
+            position: relative;
+            min-width: 0;
+        }
+
+        .podium-player img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--primary);
+            box-shadow: 0 5px 18px rgba(115, 87, 255, 0.25);
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .podium-player.first img {
+            width: 90px;
+            height: 90px;
+            border-color: #ffbe31;
+        }
+
+        .podium-player h3 {
+            font-size: 12px;
+            margin-bottom: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .podium-player p {
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 9px;
+        }
+
+        .podium-player strong {
+            font-size: 14px;
+            color: var(--orange);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .podium-block {
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 30px;
+            font-weight: 900;
+            border-radius: 10px 10px 0 0;
+            background: linear-gradient(180deg, #8a75ff, #5c48c7);
+        }
+
+        .podium-player.first .podium-block {
+            height: 115px;
+            background: linear-gradient(180deg, #ffcc53, #f19b1b);
+        }
+
+        .podium-player.second .podium-block {
+            height: 85px;
+            background: linear-gradient(180deg, #aeb5c6, #747e99);
+        }
+
+        .podium-player.third .podium-block {
+            height: 65px;
+            background: linear-gradient(180deg, #e6a36e, #b96c3c);
+        }
+
+        /* ===== SEARCH ===== */
+        .result-count {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .search-results {
+            display: grid;
+            gap: 12px;
+        }
+
+        .search-result-card {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 15px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            transition: 0.2s;
+        }
+
+        .search-result-card:hover {
+            border-color: var(--primary);
+            transform: translateX(3px);
+        }
+
+        .search-result-card img {
+            width: 43px;
+            height: 43px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-result-info strong {
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .search-result-info small {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .search-result-points {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--orange);
+            white-space: nowrap;
+        }
+
+        .search-result-class {
+            display: block;
+            color: var(--primary);
+            font-size: 9px;
+            font-weight: 800;
+            margin-top: 5px;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            color: var(--muted);
+        }
+
+        .empty-state i {
+            display: block;
+            font-size: 30px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .empty-state p { font-size: 11px; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 18px 30px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .footer span { color: var(--primary); }
+
+        /* ===== OVERLAY ===== */
+        .sidebar-overlay { display: none; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .welcome-decoration { right: 4%; opacity: 0.7; }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .close-sidebar { display: block; }
+            .sidebar-overlay.show {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 90;
+            }
+            .main-content { margin-left: 0; width: 100%; }
+            .menu-toggle { display: block; }
+            .topbar { padding: 13px 20px; }
+            .page-container { padding: 22px 20px; }
+        }
+
+        @media (max-width: 600px) {
+            .topbar { flex-wrap: wrap; gap: 12px; position: relative; }
+            .topbar-left { width: 100%; }
+            .topbar-right { width: 100%; }
+            .search-box { flex: 1; width: auto; }
+            .page-heading h1 { font-size: 16px; }
+            .welcome-banner { min-height: 235px; padding: 25px 20px; }
+            .welcome-banner p { max-width: 75%; }
+            .welcome-decoration { right: -30px; opacity: 0.2; }
+            .welcome-decoration > i { font-size: 90px; }
+            .stats-grid { gap: 10px; }
+            .stat-card { padding: 13px; gap: 9px; }
+            .stat-icon { width: 36px; height: 36px; font-size: 14px; }
+            .stat-card h2 { font-size: 18px; }
+            .stat-card p { font-size: 9px; }
+            .class-grid { grid-template-columns: 1fr; }
+            .dashboard-top-three { grid-template-columns: 1fr; }
+            .section-header h2, .page-intro h2 { font-size: 15px; }
+            .page-container { padding: 17px 13px; }
+            .table-header { padding: 15px; align-items: flex-start; }
+            .table-header h2 { font-size: 13px; }
+            th, td { padding: 12px 13px; }
+            .compact-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .compact-stats .stat-card { flex-direction: column; align-items: flex-start; }
+            .compact-stats .stat-card h2 { font-size: 16px; }
+            .podium { gap: 5px; min-height: 280px; }
+            .podium-player img { width: 53px; height: 53px; }
+            .podium-player.first img { width: 68px; height: 68px; }
+            .podium-player h3 { font-size: 10px; }
+            .podium-player p { font-size: 8px; }
+            .podium-player strong { font-size: 11px; }
+            .footer { flex-direction: column; padding: 15px; text-align: center; }
+        }
+
+        @media (max-width: 370px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .compact-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .compact-stats .stat-card { padding: 9px; }
+            .welcome-banner p { max-width: 100%; }
+            .welcome-decoration { display: none; }
+        }
+
+        /* ===== HIDE ACTION COLUMNS ===== */
+        .action-heading,
+        .action-cell {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div>
+                    <h2>PLAYER<span>ZONE</span></h2>
+                    <small>STUDENT ARENA</small>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <p class="sidebar-heading">MAIN MENU</p>
+                <button class="nav-link active" data-page="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-link" data-page="classes">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Classes</span>
+                </button>
+                <button class="nav-link" data-page="topplayers">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Top 3 Players</span>
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <p class="sidebar-heading">YOUR CLASSES</p>
+                <div id="sidebarClasses"></div>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-profile">
+                    <div class="profile-avatar">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <strong>Admin</strong>
+                        <small>Game Controller</small>
+                    </div>
+                    <i class="fa-solid fa-circle online"></i>
+                </div>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="page-heading">
+                        <h1 id="pageTitle">Dashboard</h1>
+                        <p id="pageSubtitle">Welcome to your student gaming arena</p>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="globalSearch" placeholder="Search students, classes..." autocomplete="off">
+                        <span class="search-shortcut">/</span>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- PAGE CONTENT -->
+            <section class="page-container" id="pageContainer">
+
+                <!-- DASHBOARD -->
+                <div class="page active" id="dashboardPage">
+                    <div class="welcome-banner">
+                        <div class="welcome-content">
+                            <span class="eyebrow">
+                                <i class="fa-solid fa-bolt"></i>
+                                STUDENT LEADERBOARD
+                            </span>
+                            <h2>Welcome to the <span>ARENA!</span></h2>
+                            <p>
+                                Track your students, view their points,
+                                and discover the champions.
+                            </p>
+                            <button class="primary-button" id="viewClassesBtn">
+                                Explore Classes
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="welcome-decoration">
+                            <i class="fa-solid fa-trophy"></i>
+                            <div class="decoration-circle circle-one"></div>
+                            <div class="decoration-circle circle-two"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <p>Total Students</p>
+                                <h2 id="totalStudents">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <p>Total Classes</p>
+                                <h2 id="totalClasses">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div>
+                                <p>Total Points</p>
+                                <h2 id="totalPoints">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <p>Highest Points</p>
+                                <h2 id="highestPoints">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Class Arena</h2>
+                            <p>Select a class to view its players.</p>
+                        </div>
+                        <button class="text-button" id="allClassesBtn">
+                            View All <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="class-grid" id="dashboardClasses"></div>
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Top Champions</h2>
+                            <p>The highest-ranked students across all classes.</p>
+                        </div>
+                        <button class="text-button" id="allPlayersBtn">
+                            View Rankings <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="dashboard-top-three" id="dashboardTopThree"></div>
+                </div>
+
+                <!-- CLASSES PAGE -->
+                <div class="page" id="classesPage">
+                    <div class="page-intro">
+                        <div>
+                            <h2>Choose Your Arena</h2>
+                            <p>Explore the players in each class.</p>
+                        </div>
+                        <span class="result-count" id="classCount">0 Classes</span>
+                    </div>
+                    <div class="class-grid" id="allClasses"></div>
+                </div>
+
+                <!-- INDIVIDUAL CLASS PAGE -->
+                <div class="page" id="classDetailPage">
+                    <div class="class-detail-header">
+                        <button class="back-button" id="backToClasses">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Back to Classes
+                        </button>
+
+                        <div class="class-detail-title">
+                            <div class="class-large-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div>
+                                <span class="eyebrow">CLASS ARENA</span>
+                                <h2 id="detailClassName">IOT-A</h2>
+                                <p id="detailClassCount">10 Players</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOP 3 BUTTON FOR CLASS -->
+                    <div class="class-top3-bar" style="display: none;">
+                        <button class="primary-button" id="classTop3Btn" style="display: none;">
+                            <i class="fa-solid fa-crown"></i>
+                            View Top 3 Players
+                        </button>
+                    </div>
+
+                    <div class="stats-grid compact-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <p>Players</p>
+                                <h2 id="classStudentCount">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div>
+                                <p>Total Points</p>
+                                <h2 id="classTotalPoints">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div>
+                                <p>Highest Score</p>
+                                <h2 id="classHighestPoints">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-card">
+                        <div class="table-header">
+                            <div>
+                                <h2>Player Rankings</h2>
+                                <p>Points are displayed below.</p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Reg. No</th>
+                                        <th>Player</th>
+                                        <th>Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOP 3 PAGE -->
+                <div class="page" id="topplayersPage">
+                    <div class="page-intro">
+                        <div>
+                            <span class="eyebrow">HALL OF FAME</span>
+                            <h2 id="topPageTitle">Top 3 Champions</h2>
+                            <p id="topPageSubtitle">The three highest-scoring students across all classes.</p>
+                        </div>
+                    </div>
+
+                    <div class="podium" id="podium"></div>
+
+                    <!-- Overall champion table -->
+                    <div class="table-card" id="overallChampionCard">
+                        <div class="table-header">
+                            <div>
+                                <h2>Champion Leaderboard</h2>
+                                <p id="championTableSubtitle">Overall top three students.</p>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Player</th>
+                                        <th>Reg. No</th>
+                                        <th>Class</th>
+                                        <th>Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topPlayersTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- CLASS-WISE TOP 3 -->
+                    <div id="classWiseTop3Section">
+                        <div class="section-header">
+                            <div>
+                                <h2>Class-wise Top 3</h2>
+                                <p>Best performers from each class.</p>
+                            </div>
+                        </div>
+                        <div id="classWiseTop3Container"></div>
+                    </div>
+                </div>
+
+                <!-- SEARCH RESULTS -->
+                <div class="page" id="searchPage">
+                    <div class="page-intro">
+                        <div>
+                            <h2>Search Results</h2>
+                            <p id="searchDescription">Matching records</p>
+                        </div>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <p>PLAYERZONE <span>•</span> Student Ranking System</p>
+                <p>Powered by HTML, CSS & JavaScript</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* =========================================
+           1. HARDCODED STUDENT DATA
+           WITH PRE-ASSIGNED POINTS (EDIT HERE)
+        ========================================= */
+
+        const INITIAL_CLASSES = {
+            "IOT-A": [
+                { regNo: "SB001", name: "Aathiran R", gender: "Male", points: 120 },
+                { regNo: "SB002", name: "Abinav P Suthi", gender: "Male", points: 95 },
+                { regNo: "SB003", name: "Abirami J P", gender: "Female", points: 150 },
+                { regNo: "SB004", name: "Akash M", gender: "Male", points: 80 },
+                { regNo: "SB005", name: "Akshitha Asin", gender: "Female", points: 110 },
+                { regNo: "SB006", name: "Antony Sharlin R", gender: "Male", points: 70 },
+                { regNo: "SB007", name: "Aravinth S", gender: "Male", points: 60 },
+                { regNo: "SB008", name: "Arul Pandiyan S", gender: "Male", points: 130 },
+                { regNo: "SB009", name: "Atchaya S", gender: "Female", points: 90 },
+                { regNo: "SB010", name: "Barath P", gender: "Male", points: 105 },
+                { regNo: "SB011", name: "Brintha R", gender: "Female", points: 45 },
+                { regNo: "SB012", name: "Dhaksha S V", gender: "Female", points: 75 },
+                { regNo: "SB013", name: "Dharshana M", gender: "Female", points: 55 },
+                { regNo: "SB014", name: "Dharshini K", gender: "Female", points: 65 },
+                { regNo: "SB015", name: "Dharvin T", gender: "Male", points: 85 },
+                { regNo: "SB016", name: "Dilip Raj R", gender: "Male", points: 100 },
+                { regNo: "SB017", name: "Elakkiya Priya R", gender: "Female", points: 115 },
+                { regNo: "SB018", name: "Gaushik Ram R", gender: "Male", points: 140 },
+                { regNo: "SB019", name: "Gnaneshwaran M", gender: "Male", points: 30 },
+                { regNo: "SB020", name: "Gokul B", gender: "Male", points: 50 },
+                { regNo: "SB021", name: "Gokul Prasath C", gender: "Male", points: 20 },
+                { regNo: "SB022", name: "Gopika R", gender: "Female", points: 125 },
+                { regNo: "SB023", name: "Gurudarsan N", gender: "Male", points: 35 },
+                { regNo: "SB024", name: "Haripriya S", gender: "Female", points: 40 },
+                { regNo: "SB025", name: "Harishka P", gender: "Female", points: 10 },
+                { regNo: "SB026", name: "Harshavarthan N", gender: "Male", points: 145 },
+                { regNo: "SB027", name: "Hashini C", gender: "Female", points: 25 },
+                { regNo: "SB028", name: "Hemanth V P", gender: "Male", points: 15 },
+                { regNo: "SB029", name: "Induja M", gender: "Female", points: 5 },
+                { regNo: "SB030", name: "Jaivanth J G", gender: "Male", points: 160 },
+                { regNo: "SB031", name: "Jaswin Paul J", gender: "Male", points: 135 },
+                { regNo: "SB032", name: "Jayasurya R", gender: "Male", points: 88 },
+                { regNo: "SB033", name: "Jeevika S", gender: "Female", points: 92 },
+                { regNo: "SB034", name: "Jerusha Jaffy R", gender: "Female", points: 78 },
+                { regNo: "SB035", name: "Kajalakshmi S", gender: "Female", points: 68 },
+                { regNo: "SB036", name: "Kalaivanan T", gender: "Male", points: 58 },
+                { regNo: "SB037", name: "Kamalesh K", gender: "Male", points: 48 },
+                { regNo: "SB038", name: "Kamalesh M", gender: "Male", points: 38 },
+                { regNo: "SB039", name: "Kanika K", gender: "Female", points: 28 },
+                { regNo: "SB040", name: "Kanishgar E", gender: "Male", points: 18 },
+                { regNo: "SB041", name: "Kanishka S", gender: "Female", points: 8 },
+                { regNo: "SB042", name: "Kapilesh T", gender: "Male", points: 98 },
+                { regNo: "SB043", name: "Kirithik R", gender: "Male", points: 108 },
+                { regNo: "SB044", name: "Kishore C", gender: "Male", points: 118 },
+                { regNo: "SB045", name: "Kishore Kumar K", gender: "Male", points: 128 },
+                { regNo: "SB046", name: "Koushik K", gender: "Male", points: 138 },
+                { regNo: "SB047", name: "Koushik V", gender: "Male", points: 148 },
+                { regNo: "SB048", name: "Kowsalya S", gender: "Female", points: 158 },
+                { regNo: "SB049", name: "Krishitha P", gender: "Female", points: 168 },
+                { regNo: "SB050", name: "Logamithraa R", gender: "Female", points: 178 },
+                { regNo: "SB051", name: "Lokeshwara Rao Pr", gender: "Male", points: 22 },
+                { regNo: "SB052", name: "Luckiswaran A S", gender: "Male", points: 32 },
+                { regNo: "SB053", name: "Madhumitha S", gender: "Female", points: 42 },
+                { regNo: "SB054", name: "Mahalakshmi S", gender: "Female", points: 52 },
+                { regNo: "SB055", name: "Maheshwaran S", gender: "Male", points: 62 }
+            ],
+
+            "IOT-B": [
+                { regNo: "SB056", name: "Manav Jangir", gender: "Male", points: 200 },
+                { regNo: "SB057", name: "Manikandan G", gender: "Male", points: 190 },
+                { regNo: "SB058", name: "Manikandan P", gender: "Male", points: 180 },
+                { regNo: "SB059", name: "Mithra R", gender: "Female", points: 170 },
+                { regNo: "SB060", name: "Mithran R", gender: "Male", points: 160 },
+                { regNo: "SB061", name: "Mohammed Eliyaaz A", gender: "Male", points: 150 },
+                { regNo: "SB062", name: "Naga Sujitha S", gender: "Female", points: 140 },
+                { regNo: "SB063", name: "Nagul Kumar G", gender: "Male", points: 130 },
+                { regNo: "SB064", name: "Narendiran K", gender: "Male", points: 120 },
+                { regNo: "SB065", name: "Navajothi S", gender: "Female", points: 110 },
+                { regNo: "SB066", name: "Naveen Sushant G", gender: "Male", points: 100 },
+                { regNo: "SB067", name: "Nedha Aneesh", gender: "Female", points: 90 },
+                { regNo: "SB068", name: "Nihal Ahmed I", gender: "Male", points: 80 },
+                { regNo: "SB069", name: "Niksita M S", gender: "Female", points: 70 },
+                { regNo: "SB070", name: "Nishanth N", gender: "Male", points: 60 },
+                { regNo: "SB071", name: "Nishanthini K", gender: "Female", points: 50 },
+                { regNo: "SB072", name: "Noorul Faliha M", gender: "Female", points: 40 },
+                { regNo: "SB073", name: "Padmashree A", gender: "Female", points: 30 },
+                { regNo: "SB074", name: "Pavithiran K V", gender: "Male", points: 20 },
+                { regNo: "SB075", name: "Phenix J", gender: "Male", points: 10 },
+                { regNo: "SB076", name: "Prabhu S", gender: "Male", points: 210 },
+                { regNo: "SB077", name: "Prakash L", gender: "Male", points: 220 },
+                { regNo: "SB078", name: "Praneetha V", gender: "Female", points: 230 },
+                { regNo: "SB079", name: "Priyadharshini U", gender: "Female", points: 240 },
+                { regNo: "SB080", name: "Priyanka S", gender: "Female", points: 250 },
+                { regNo: "SB081", name: "Rahini B", gender: "Female", points: 260 },
+                { regNo: "SB082", name: "Rathika R", gender: "Female", points: 270 },
+                { regNo: "SB083", name: "Rijay Surya C", gender: "Male", points: 280 },
+                { regNo: "SB084", name: "Risheraaj M K", gender: "Male", points: 290 },
+                { regNo: "SB085", name: "Rishihesh S", gender: "Male", points: 300 },
+                { regNo: "SB086", name: "Rithik B", gender: "Male", points: 310 },
+                { regNo: "SB087", name: "Rithika C M", gender: "Female", points: 320 },
+                { regNo: "SB088", name: "Rithikasri K", gender: "Female", points: 330 },
+                { regNo: "SB089", name: "Rubiga B", gender: "Female", points: 340 },
+                { regNo: "SB090", name: "Sakthi Parthiv V", gender: "Male", points: 350 },
+                { regNo: "SB091", name: "Salman Khan S", gender: "Male", points: 360 },
+                { regNo: "SB092", name: "Samyuktha P V", gender: "Female", points: 370 },
+                { regNo: "SB093", name: "Sanjai S", gender: "Male", points: 380 },
+                { regNo: "SB094", name: "Sanjana S", gender: "Female", points: 390 },
+                { regNo: "SB095", name: "Sanjay P", gender: "Male", points: 400 },
+                { regNo: "SB096", name: "Sanjay S", gender: "Male", points: 410 },
+                { regNo: "SB097", name: "Shabari Vasan V", gender: "Male", points: 420 },
+                { regNo: "SB098", name: "Shaiguru M P", gender: "Male", points: 430 },
+                { regNo: "SB099", name: "Shamyuktha S", gender: "Female", points: 440 },
+                { regNo: "SB100", name: "Shandiya S", gender: "Female", points: 450 },
+                { regNo: "SB101", name: "Shivani K", gender: "Female", points: 460 },
+                { regNo: "SB102", name: "Sreejitha G S", gender: "Female", points: 470 },
+                { regNo: "SB103", name: "Sri Haran G D", gender: "Male", points: 480 },
+                { regNo: "SB104", name: "Sudhisha K", gender: "Female", points: 490 },
+                { regNo: "SB105", name: "Tharun V", gender: "Male", points: 500 },
+                { regNo: "SB106", name: "Yaswanth V A", gender: "Male", points: 510 },
+                { regNo: "SB107", name: "Yoginder S A", gender: "Male", points: 520 },
+                { regNo: "SB108", name: "Yugeshwaran K", gender: "Male", points: 530 },
+                { regNo: "SB109", name: "Yuvadharani R", gender: "Female", points: 540 }
+            ],
+
+            "CSD": [
+                { regNo: "CD001", name: "Abilasha Poorani A", gender: "Female", points: 300 },
+                { regNo: "CD002", name: "Abinaya S", gender: "Female", points: 290 },
+                { regNo: "CD003", name: "Aishwarya S", gender: "Female", points: 280 },
+                { regNo: "CD004", name: "Bala Varshini P", gender: "Female", points: 270 },
+                { regNo: "CD005", name: "Bhoopathi A", gender: "Male", points: 260 },
+                { regNo: "CD006", name: "Dhivyadharshini K", gender: "Female", points: 250 },
+                { regNo: "CD007", name: "Harish T", gender: "Male", points: 240 },
+                { regNo: "CD008", name: "Harshatha T S S", gender: "Female", points: 230 },
+                { regNo: "CD009", name: "Hasin K", gender: "Male", points: 220 },
+                { regNo: "CD010", name: "Hemanth B", gender: "Male", points: 210 },
+                { regNo: "CD011", name: "Kabil Esh", gender: "Male", points: 200 },
+                { regNo: "CD012", name: "Krishanth R", gender: "Male", points: 190 },
+                { regNo: "CD013", name: "Lakshitha S", gender: "Female", points: 180 },
+                { regNo: "CD014", name: "Lathika Shri J", gender: "Female", points: 170 },
+                { regNo: "CD015", name: "Lokeshwaran M", gender: "Male", points: 160 },
+                { regNo: "CD016", name: "Meilaperumal E", gender: "Male", points: 150 },
+                { regNo: "CD017", name: "Mohamed Akram M", gender: "Male", points: 140 },
+                { regNo: "CD018", name: "Nivetha M", gender: "Female", points: 130 },
+                { regNo: "CD019", name: "Pooja Sri S", gender: "Female", points: 120 },
+                { regNo: "CD020", name: "Rakesh R", gender: "Male", points: 110 },
+                { regNo: "CD021", name: "Rithika S", gender: "Female", points: 100 },
+                { regNo: "CD022", name: "Rohitha R", gender: "Female", points: 90 },
+                { regNo: "CD023", name: "Sakthi Vikash S", gender: "Male", points: 80 },
+                { regNo: "CD024", name: "Sarvesh S", gender: "Male", points: 70 },
+                { regNo: "CD025", name: "Sasitha D A", gender: "Female", points: 60 },
+                { regNo: "CD026", name: "Selva Abinaya D", gender: "Female", points: 50 },
+                { regNo: "CD027", name: "Shivakumar S", gender: "Male", points: 40 },
+                { regNo: "CD028", name: "Selvapriya R", gender: "Female", points: 30 },
+                { regNo: "CD029", name: "Srinitha A", gender: "Female", points: 20 },
+                { regNo: "CD030", name: "Subhiksha S B", gender: "Female", points: 10 },
+                { regNo: "CD031", name: "Subishan M", gender: "Male", points: 310 },
+                { regNo: "CD032", name: "Sujith R", gender: "Male", points: 320 },
+                { regNo: "CD033", name: "Swetha S", gender: "Female", points: 330 },
+                { regNo: "CD034", name: "Thashvin A", gender: "Male", points: 340 },
+                { regNo: "CD035", name: "Varsha P", gender: "Female", points: 350 },
+                { regNo: "CD036", name: "Varshini S", gender: "Female", points: 360 },
+                { regNo: "CD037", name: "Yogadeepan G L", gender: "Male", points: 370 }
+            ]
+        };
+
+        /* =========================================
+           2. APP STATE (No localStorage — hardcoded only)
+        ========================================= */
+
+        const students = structuredClone(INITIAL_CLASSES);
+        let currentPage = "dashboard";
+        let currentClass = null;
+        let currentSearch = "";
+
+        /* =========================================
+           3. HELPER FUNCTIONS
+        ========================================= */
+
+        function getAllStudents() {
+            return Object.entries(students).flatMap(
+                ([className, records]) =>
+                    records.map(student => ({
+                        ...student,
+                        className
+                    }))
+            );
+        }
+
+        function getSortedStudents(className) {
+            return [...(students[className] || [])].sort((a, b) => {
+                if (a.points !== b.points) return b.points - a.points;
+                return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+            });
+        }
+
+        function getTopThree() {
+            return getAllStudents()
+                .sort((a, b) => {
+                    if (a.points !== b.points) return b.points - a.points;
+                    const nameComp = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+                    if (nameComp !== 0) return nameComp;
+                    return a.className.localeCompare(b.className);
+                })
+                .slice(0, 3);
+        }
+
+        function getClassTopThree(className) {
+            const records = students[className] || [];
+            return [...records]
+                .sort((a, b) => {
+                    if (a.points !== b.points) return b.points - a.points;
+                    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+                })
+                .slice(0, 3);
+        }
+
+        function getAvatar(student) {
+            return student?.gender === "Female"
+                ? "./images/girl.jpg"
+                : "./images/boy.jpg";
+        }
+
+        function escapeHTML(value) {
+            return String(value).replace(/[&<>"']/g, c => {
+                const e = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+                return e[c];
+            });
+        }
+
+        function formatNumber(n) {
+            return Number(n).toLocaleString("en-IN");
+        }
+
+        function getTotalPoints(records) {
+            return records.reduce((t, s) => t + s.points, 0);
+        }
+
+        function emptyState(title, message) {
+            return `
+                <div class="empty-state">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <h3>${escapeHTML(title)}</h3>
+                    <p>${escapeHTML(message)}</p>
+                </div>
+            `;
+        }
+
+        /* =========================================
+           4. NAVIGATION
+        ========================================= */
+
+        function navigateTo(page, className = null) {
+            currentPage = page;
+            currentClass = className;
+
+            if (page !== "search") {
+                currentSearch = "";
+                document.getElementById("globalSearch").value = "";
+            }
+
+            renderNavigation();
+            renderCurrentPage();
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function renderNavigation() {
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            const pageEl = document.getElementById(currentPage + "Page");
+            if (pageEl) pageEl.classList.add("active");
+
+            document.querySelectorAll(".nav-link").forEach(b => b.classList.remove("active"));
+            const activeBtn = document.querySelector(`.nav-link[data-page="${currentPage}"]`);
+            if (activeBtn) activeBtn.classList.add("active");
+
+            const titles = {
+                dashboard: ["Dashboard", "Welcome to your student gaming arena"],
+                classes: ["Classes", "Explore all student classes"],
+                classDetail: [currentClass || "Class", "View and manage student rankings"],
+                topplayers: ["Top 3 Players", "The champions of your student arena"],
+                search: ["Search Results", "Find matching students and classes"]
+            };
+            const t = titles[currentPage] || titles.dashboard;
+            document.getElementById("pageTitle").textContent = t[0];
+            document.getElementById("pageSubtitle").textContent = t[1];
+        }
+
+        function renderSidebarClasses() {
+            const container = document.getElementById("sidebarClasses");
+            container.innerHTML = Object.keys(students).map(className => `
+                <button
+                    class="nav-link ${currentPage === "classDetail" && currentClass === className ? "active" : ""}"
+                    data-class="${escapeHTML(className)}"
+                >
+                    <i class="fa-solid fa-shield"></i>
+                    <span>${escapeHTML(className)}</span>
+                </button>
+            `).join("");
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("open");
+            document.getElementById("sidebarOverlay").classList.remove("show");
+        }
+
+        /* =========================================
+           5. RENDER CURRENT PAGE
+        ========================================= */
+
+        function renderCurrentPage() {
+            renderSidebarClasses();
+            switch (currentPage) {
+                case "dashboard": renderDashboard(); break;
+                case "classes": renderClasses(); break;
+                case "classDetail": renderClassDetail(); break;
+                case "topplayers": renderTopPlayers(); break;
+                case "search": renderSearchResults(); break;
+            }
+        }
+
+        /* =========================================
+           6. DASHBOARD
+        ========================================= */
+
+        function renderDashboard() {
+            const all = getAllStudents();
+            const totalPoints = getTotalPoints(all);
+
+            document.getElementById("totalStudents").textContent = formatNumber(all.length);
+            document.getElementById("totalClasses").textContent = Object.keys(students).length;
+            document.getElementById("totalPoints").textContent = formatNumber(totalPoints);
+            document.getElementById("highestPoints").textContent = formatNumber(
+                Math.max(0, ...all.map(s => s.points))
+            );
+
+            renderClassCards(document.getElementById("dashboardClasses"), Object.keys(students));
+
+            const topThree = getTopThree();
+            document.getElementById("dashboardTopThree").innerHTML = topThree.length
+                ? topThree.map((student, index) => `
+                    <div class="mini-player">
+                        <span class="rank-badge">
+                            ${["🥇 1ST PLACE", "🥈 2ND PLACE", "🥉 3RD PLACE"][index]}
+                        </span>
+                        <img src="${getAvatar(student)}" alt="${escapeHTML(student.name)}">
+                        <h3>${escapeHTML(student.name)}</h3>
+                        <p>${escapeHTML(student.className)}</p>
+                        <strong>
+                            <i class="fa-solid fa-star"></i>
+                            ${formatNumber(student.points)} Points
+                        </strong>
+                    </div>
+                `).join("")
+                : emptyState("No players yet", "Add students to get started.");
+        }
+
+        /* =========================================
+           7. CLASS CARDS
+        ========================================= */
+
+        function renderClassCards(container, classNames) {
+            container.innerHTML = classNames.length
+                ? classNames.map(className => {
+                    const records = students[className] || [];
+                    const total = getTotalPoints(records);
+                    return `
+                        <div class="class-card" data-open-class="${escapeHTML(className)}">
+                            <div class="class-card-top">
+                                <div class="class-card-icon">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <i class="fa-solid fa-arrow-up-right-from-square class-card-arrow"></i>
+                            </div>
+                            <h3>${escapeHTML(className)}</h3>
+                            <p>${records.length} Players</p>
+                            <div class="class-card-footer">
+                                <span>
+                                    <i class="fa-solid fa-star"></i>
+                                    ${formatNumber(total)} Points
+                                </span>
+                                <strong>Enter Arena →</strong>
+                            </div>
+                        </div>
+                    `;
+                }).join("")
+                : emptyState("No results found", "No matching classes were found.");
+        }
+
+        function renderClasses() {
+            const classNames = Object.keys(students);
+            document.getElementById("classCount").textContent = `${classNames.length} Classes`;
+            renderClassCards(document.getElementById("allClasses"), classNames);
+        }
+
+        /* =========================================
+           8. CLASS DETAILS
+        ========================================= */
+
+        function renderClassDetail() {
+            if (!currentClass || !students[currentClass]) {
+                navigateTo("classes");
+                return;
+            }
+
+            const records = getSortedStudents(currentClass);
+            const totalPoints = getTotalPoints(records);
+
+            document.getElementById("detailClassName").textContent = currentClass;
+            document.getElementById("detailClassCount").textContent = `${records.length} Players`;
+            document.getElementById("classStudentCount").textContent = records.length;
+            document.getElementById("classTotalPoints").textContent = formatNumber(totalPoints);
+            document.getElementById("classHighestPoints").textContent = formatNumber(
+                Math.max(0, ...records.map(s => s.points))
+            );
+
+            const query = currentSearch.trim().toLowerCase();
+            const filtered = query
+                ? records.filter(s => [
+                    s.regNo, s.name, s.gender, currentClass, String(s.points)
+                ].some(v => String(v).toLowerCase().includes(query)))
+                : records;
+
+            const tbody = document.getElementById("studentTableBody");
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="4">${emptyState("No results found", "Try another search term.")}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((student, i) => {
+                const originalRank = records.findIndex(r => r.regNo === student.regNo) + 1;
+                const rankClass = originalRank === 1 ? "first" : originalRank === 2 ? "second" : originalRank === 3 ? "third" : "";
+                return `
+                    <tr>
+                        <td><span class="rank-number ${rankClass}">${originalRank}</span></td>
+                        <td>${escapeHTML(student.regNo)}</td>
+                        <td>
+                            <div class="player-info">
+                                <img src="${getAvatar(student)}" alt="${escapeHTML(student.name)}">
+                                <strong>${escapeHTML(student.name)}</strong>
+                            </div>
+                        </td>
+                        <td><span class="points-badge">${formatNumber(student.points)}</span></td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        /* =========================================
+           9. TOP THREE PLAYERS
+        ========================================= */
+
+        function renderTopPlayers() {
+            const topThree = getTopThree();
+            const podium = document.getElementById("podium");
+
+            const podiumOrder = [
+                { index: 1, className: "second" },
+                { index: 0, className: "first" },
+                { index: 2, className: "third" }
+            ];
+
+            podium.innerHTML = topThree.length
+                ? podiumOrder
+                    .filter(item => topThree[item.index])
+                    .map(item => {
+                        const student = topThree[item.index];
+                        return `
+                            <div class="podium-player ${item.className}">
+                                <img src="${getAvatar(student)}" alt="${escapeHTML(student.name)}">
+                                <h3>${escapeHTML(student.name)}</h3>
+                                <p>${escapeHTML(student.className)}</p>
+                                <strong>${formatNumber(student.points)} PTS</strong>
+                                <div class="podium-block">${item.index + 1}</div>
+                            </div>
+                        `;
+                    }).join("")
+                : emptyState("No champions yet", "Students will appear here.");
+
+            const tbody = document.getElementById("topPlayersTable");
+            tbody.innerHTML = topThree.length
+                ? topThree.map((student, i) => `
+                    <tr>
+                        <td><span class="rank-number ${["first", "second", "third"][i]}">${i + 1}</span></td>
+                        <td>
+                            <div class="player-info">
+                                <img src="${getAvatar(student)}" alt="${escapeHTML(student.name)}">
+                                <strong>${escapeHTML(student.name)}</strong>
+                            </div>
+                        </td>
+                        <td>${escapeHTML(student.regNo)}</td>
+                        <td>${escapeHTML(student.className)}</td>
+                        <td><span class="points-badge">${formatNumber(student.points)}</span></td>
+                    </tr>
+                `).join("")
+                : `<tr><td colspan="5">${emptyState("No champions yet", "No students are available.")}</td></tr>`;
+
+            document.getElementById("topPageTitle").textContent = "Top 3 Champions";
+            document.getElementById("topPageSubtitle").textContent = "The three highest-scoring students across all classes.";
+            document.getElementById("championTableSubtitle").textContent = "Overall top three students.";
+
+            const classWiseContainer = document.getElementById("classWiseTop3Container");
+            const classWiseSection = document.getElementById("classWiseTop3Section");
+            if (classWiseSection) classWiseSection.style.display = "block";
+
+            if (classWiseContainer) {
+                const classNames = Object.keys(students);
+                if (classNames.length === 0) {
+                    classWiseContainer.innerHTML = emptyState("No classes", "No class data available.");
+                } else {
+                    classWiseContainer.innerHTML = classNames.map(className => {
+                        const classTop = getClassTopThree(className);
+                        if (!classTop.length) return "";
+                        return `
+                            <div class="table-card" style="margin-top: 20px;">
+                                <div class="table-header">
+                                    <div>
+                                        <h2>${escapeHTML(className)}</h2>
+                                        <p>Top 3 performers</p>
+                                    </div>
+                                </div>
+                                <div class="table-wrapper">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Player</th>
+                                                <th>Reg. No</th>
+                                                <th>Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${classTop.map((student, i) => `
+                                                <tr>
+                                                    <td><span class="rank-number ${["first","second","third"][i]}">${i + 1}</span></td>
+                                                    <td>
+                                                        <div class="player-info">
+                                                            <img src="${getAvatar(student)}" alt="${escapeHTML(student.name)}">
+                                                            <strong>${escapeHTML(student.name)}</strong>
+                                                        </div>
+                                                    </td>
+                                                    <td>${escapeHTML(student.regNo)}</td>
+                                                    <td><span class="points-badge">${formatNumber(student.points)}</span></td>
+                                                </tr>
+                                            `).join("")}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+                }
+            }
+        }
+
+        /* =========================================
+           10. SEARCH
+        ========================================= */
+
+        function searchStudents(query) {
+            currentSearch = query;
+            if (!query.trim()) {
+                if (currentPage === "search") {
+                    navigateTo("dashboard");
+                } else {
+                    renderCurrentPage();
+                }
+                return;
+            }
+            currentPage = "search";
+            renderNavigation();
+            renderSearchResults();
+            renderSidebarClasses();
+        }
+
+        function renderSearchResults() {
+            const query = currentSearch.trim().toLowerCase();
+            const results = [];
+
+            Object.entries(students).forEach(([className, records]) => {
+                const classMatches = className.toLowerCase().includes(query);
+                records.forEach(student => {
+                    const studentMatches = [
+                        student.name, student.regNo, student.gender, String(student.points)
+                    ].some(v => String(v).toLowerCase().includes(query));
+                    if (classMatches || studentMatches) {
+                        results.push({ ...student, className });
+                    }
+                });
+            });
+
+            results.sort((a, b) => {
+                if (a.points !== b.points) return b.points - a.points;
+                return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+            });
+
+            document.getElementById("searchDescription").textContent =
+                `${results.length} matching student${results.length === 1 ? "" : "s"}`;
+
+            const container = document.getElementById("searchResults");
+            container.innerHTML = results.length
+                ? results.map(student => `
+                    <div class="search-result-card">
+                        <img src="${getAvatar(student)}" alt="${escapeHTML(student.name)}">
+                        <div class="search-result-info">
+                            <strong>${escapeHTML(student.name)}</strong>
+                            <small>${escapeHTML(student.regNo)} · ${escapeHTML(student.gender)}</small>
+                            <span class="search-result-class">${escapeHTML(student.className)}</span>
+                        </div>
+                        <div class="search-result-points">
+                            <i class="fa-solid fa-star"></i>
+                            ${formatNumber(student.points)}
+                        </div>
+                    </div>
+                `).join("")
+                : emptyState("No results found", "Try searching with a different name, registration number, class, gender, or points.");
+        }
+
+        /* =========================================
+           11. THEME
+        ========================================= */
+
+        function initTheme() {
+            const saved = localStorage.getItem("playerzone_theme");
+            const theme = saved === "dark" ? "dark" : "light";
+            document.body.classList.toggle("dark", theme === "dark");
+            updateThemeIcon();
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle("dark");
+            localStorage.setItem("playerzone_theme", isDark ? "dark" : "light");
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const btn = document.getElementById("themeToggle");
+            btn.innerHTML = document.body.classList.contains("dark")
+                ? '<i class="fa-solid fa-sun"></i>'
+                : '<i class="fa-solid fa-moon"></i>';
+        }
+
+        /* =========================================
+           12. EVENT LISTENERS
+        ========================================= */
+
+        document.addEventListener("click", e => {
+            const navBtn = e.target.closest(".nav-link[data-page]");
+            if (navBtn) { navigateTo(navBtn.dataset.page); return; }
+
+            const classBtn = e.target.closest(".nav-link[data-class]");
+            if (classBtn) { navigateTo("classDetail", classBtn.dataset.class); return; }
+
+            const classCard = e.target.closest("[data-open-class]");
+            if (classCard) { navigateTo("classDetail", classCard.dataset.openClass); return; }
+
+            // Add/Subtract buttons are removed — no action
+        });
+
+        document.getElementById("globalSearch").addEventListener("input", e => searchStudents(e.target.value));
+        document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+
+        document.getElementById("menuToggle").addEventListener("click", () => {
+            document.getElementById("sidebar").classList.add("open");
+            document.getElementById("sidebarOverlay").classList.add("show");
+        });
+
+        document.getElementById("sidebarOverlay").addEventListener("click", closeSidebar);
+        document.getElementById("viewClassesBtn").addEventListener("click", () => navigateTo("classes"));
+        document.getElementById("allClassesBtn").addEventListener("click", () => navigateTo("classes"));
+        document.getElementById("allPlayersBtn").addEventListener("click", () => navigateTo("topplayers"));
+        document.getElementById("backToClasses").addEventListener("click", () => navigateTo("classes"));
+
+        document.addEventListener("keydown", e => {
+            const active = document.activeElement;
+            const isTyping = active && ["INPUT", "TEXTAREA"].includes(active.tagName);
+            if (e.key === "/" && !isTyping) {
+                e.preventDefault();
+                document.getElementById("globalSearch").focus();
+            }
+            if (e.key === "Escape") {
+                closeSidebar();
+            }
+        });
+
+        /* =========================================
+           13. INITIALIZE
+        ========================================= */
+
+        function initializeApp() {
+            initTheme();
+            renderSidebarClasses();
+            navigateTo("dashboard");
+        }
+
+        initializeApp();
+    </script>
+</body>
+</html>
